@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Berita</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #0F172A;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-blue-900 p-4 text-white flex justify-between items-center">
+        <h1 class="text-3xl font-semibold pl-8">Website Berita dengan API</h1>
+        <a href="../../../index.html#portfolio" class="bg-blue-900 text-white mr-8 hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-300 transition rounded-md px-4 py-2 border border-white">Kembali</a>
+    </header>
+
+    <div class="container mx-auto my-8 px-4 sm:px-8 md:px-12 lg:px-16">
+        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+            <input id="search-input" type="text" class="flex-1 border border-gray-300 rounded-md p-2" placeholder="Cari berita...">
+            <select id="category-dropdown" class="flex-1 border border-gray-300 rounded-md p-2">
+                <option value="">Semua Kategori</option>
+                <option value="technology">Teknologi</option>
+                <option value="sports">Olahraga</option>
+                <option value="health">Kesehatan</option>
+                <option value="business">Bisnis</option>
+            </select>
+            <button id="search-button" class="bg-blue-900 text-white font-semibold px-4 py-2 rounded-md">Cari</button>
+        </div>
+
+        <div id="news-list" class="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const apiKey = 'YOUR_API_KEY'; 
+            const apiUrl = 'https://newsapi.org/v2/top-headlines';
+            const newsList = document.getElementById('news-list');
+
+            function loadNews(category = '', query = '') {
+                fetch(`${apiUrl}?apiKey=${apiKey}&country=id&category=${category}&q=${query}`)
+                  .then(response => response.json())
+                  .then(data => {
+                    newsList.innerHTML = '';
+
+                    if (data.articles.length === 0) {
+                        newsList.innerHTML = '<p class="text-xl text-gray-600">Tidak ada berita yang tersedia.</p>';
+                    } else {
+                        data.articles.forEach((article) => {
+                            const newsItem = `
+                            <div class="bg-white shadow-md rounded-lg overflow-hidden card">
+                                <img src="${article.urlToImage || 'https://via.placeholder.com/150'}" alt="${article.title}" class="w-full h-48 object-cover object-center">
+                                <div class="p-4">
+                                    <h2 class="text-xl font-semibold mb-2"><a href="${article.url}" class="text-blue-500 hover:underline">${article.title}</a></h2>
+                                    <div class="flex items-center mt-4">
+                                        <span class="text-gray-500">Sumber:</span>
+                                        <a href="${article.url}" class="text-blue-500 ml-2 hover:underline">${article.source.name}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+
+                            newsList.innerHTML += newsItem;
+                        });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Terjadi kesalahan:', error);
+                  });
+            }
+
+            loadNews();
+
+            document.getElementById('search-button').addEventListener('click', function () {
+                const query = document.getElementById('search-input').value;
+                const category = document.getElementById('category-dropdown').value;
+                loadNews(category, query);
+            });
+
+            document.getElementById('category-dropdown').addEventListener('change', function () {
+                const query = document.getElementById('search-input').value;
+                const category = this.value;
+                loadNews(category, query);
+            });
+        });
+    </script>
+</body>
+</html>
